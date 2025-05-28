@@ -15,61 +15,55 @@ pip install maskteer
 
 In `settings.py`:
 ```python
-MIDDLEWARE = [
-    ...,
-    'maskteer.django.MaskteerMiddleware',
-]
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'maskteer': {
+            'level': 'DEBUG',
+            'class': 'maskteer.handler.MaskteerHandler',
+        },
+    },
+    "loggers" : {
+        "root": {
+            "handlers": ["maskteer"], 
+            "level": "DEBUG",
+            "propagate": True
+        }
+    },
+}
 ```
 
 
 ### Flask
 
-- Using maskteer as WSGI Middleware
 
-  ```python
-  from flask import Flask
-  from maskteer.flask import MaskteerMiddleware
+```python
+from flask import Flask
+from maskteer.handler import MaskteerHandler
 
-  app = Flask(__name__)
-  app.wsgi_app = MaskteerMiddleware(app.wsgi_app) 
-  ```
+app = Flask(__name__)
 
-- Using maskteer as middleware function
-
-  ```python
-  from flask import Flask
-  from maskteer.flask import assign_maskteer_middleware
-
-  app = Flask(__name__)
-  assign_maskteer_middleware(app)
-  ```
+handler = MaskteerHandler(config_file='path/to/your/config.yml')
+app.logger.addHandler(handler)
+```
 
 
 ### FastAPI
 
-- Using maskteer as Middleware class
+```python
+from fastapi import FastAPI
+from maskteer.handler import MaskteerHandler
 
-  ```python
-  from fastapi import FastAPI
-  from maskteer.fastapi import MaskteerMiddleware
+app = FastAPI()
 
-  app = FastAPI()
-  app.add_middleware(MaskteerMiddleware)
-  ```
-
-- Using maskteer as middleware function
-
-  ```python
-  from fastapi import FastAPI
-  from maskteer.fastapi import assign_maskteer_middleware
-
-  app = FastAPI()
-  assign_maskteer_middleware(app)
-  ```
+handler = MaskteerHandler(config_file='path/to/your/config.yml')
+app.logger.addHandler(handler)
+```
 
 ## Configuration
 
-You can configure via `maskteer.yaml` or environment variables:
+You can configure via YAML file or environment variables:
 ```yaml
 patterns:
   - "\\b[\\w.-]+@[\\w.-]+\\.\\w+\\b"
